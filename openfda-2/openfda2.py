@@ -1,6 +1,5 @@
 import http.client
 import json
-x=0
 headers = {'User-Agent': 'http-client'}
 
 conn = http.client.HTTPSConnection("api.fda.gov")
@@ -10,5 +9,8 @@ print(r1.status, r1.reason)
 repos_raw = r1.read().decode("utf-8")
 conn.close()
 repos = json.loads(repos_raw)
-print("The name of the manufactor is" , repos['results'][0]['openfda']['manufacturer_name'])
-print("The name of the manufactor is" , repos['results'][2]['openfda']['manufacturer_name'])
+for i in range(len(repos["results"])):
+    try:
+        print("The name of the manufactor is" , repos['results'][i]['openfda']['manufacturer_name'])
+    except KeyError:
+        pass
