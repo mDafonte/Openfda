@@ -14,7 +14,5 @@ repos = json.loads(repos_raw)
 print("The id of the first repository is",repos['results'][0]['id'])
 print("The purpose of the first repository is",repos['results'][0]['purpose'])
 print("The manufacturer name of the first repository is",repos['results'][0]['openfda']['manufacturer_name'])
-
-aa=[0,1,2,3,4,5,6,7,8,9]
-for i in aa:
+for i in range(10):
     print("The id is", repos["results"][i]["id"])
