@@ -9,58 +9,33 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     # GET
     def do_GET(self):
         headers = {'User-Agent': 'http-client'}
-
+        drugs_id=[]
+        message=""
         conn = http.client.HTTPSConnection("api.fda.gov")
-
-        # Get a  https://api.fda.gov/drug/label.json drug label from this URL and
-        # extract what is the id,
-        # the purpose of the drug and the manufacturer_name
-
-        conn.request("GET", "/drug/label.json", None, headers)
-        r1 = conn.getresponse()
-        print(r1.status, r1.reason)
-        drugs_raw = r1.read().decode("utf-8")
-        conn.close()
-
-        drugs = json.loads(drugs_raw)
-
-        drug = drugs['results'][0]
-
-        drug_id = drug['id']
-        drug_purpose = drug['purpose'][0]
-        drug_manufacturer_name = drug['openfda']['manufacturer_name'][0]
-
-        print(drug_id, drug_purpose, drug_manufacturer_name)
-
-        # Get 10 drugs and extract from all of them the id (tip: use the limit param for it)
-
         conn.request("GET", "/drug/label.json?limit=10", None, headers)
         r1 = conn.getresponse()
         print(r1.status, r1.reason)
         drugs_raw = r1.read().decode("utf-8")
+        drugs=json.loads(drugs_raw)
         conn.close()
-
-        drugs = json.loads(drugs_raw)['results']
-
-        for drug in drugs:
-            print(drug['id'])
-
-        # Send response status code
+        for i in range(len(drugs['results'])):
+            drugs_id.append(drugs["results"][i]["id"])
+        for elem in drugs_id:
+            message=message +"<ol>"+elem+"</ol>"
         self.send_response(200)
-
-        # Send headers
+        with open("drugs.html","w")as f:
+            f.write(message)
+        with open("drugs.html","r") as f:
+            patata=f.read()
+        self.send_response(200)
         self.send_header('Content-type','text/html')
         self.end_headers()
-
-        # Send message back to client
-        message = drugs[0]['id']
-        # Write content as utf-8 data
+        message = patata
         self.wfile.write(bytes(message, "utf8"))
         return
 
 Handler = http.server.SimpleHTTPRequestHandler
 Handler = testHTTPRequestHandler
-
 httpd = socketserver.TCPServer(("", PORT), Handler)
 print("serving at port", PORT)
 httpd.serve_forever()
