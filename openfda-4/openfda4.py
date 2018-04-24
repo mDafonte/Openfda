@@ -2,7 +2,7 @@
 import http.server
 import json
 import socketserver
-
+socketserver.TCPServer.allow_reuse_adress = True
 PORT = 8000
 
 # HTTPRequestHandler class
@@ -15,8 +15,8 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         # Send Headers
         self.send_header("Content-type","text/html")
         self.end_headers()
-        with open("search.html") as file_search:
-            message= file_search.read()
+        with open("search.html","r") as f:
+            message= f.read()
         # Write content as utf-8 data
         self.wfile.write(bytes(message, "utf8"))
         return

@@ -1,6 +1,6 @@
 import http.client
 import json
-
+socketserver.TCPServer.allow_reuse_adress = True
 headers = {'User-Agent': 'http-client'}
 
 conn = http.client.HTTPSConnection("api.fda.gov")

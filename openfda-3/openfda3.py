@@ -1,7 +1,7 @@
 import http.server
 import json
 import socketserver
-
+socketserver.TCPServer.allow_reuse_adress = True
 PORT = 8000
 
 # HTTPRequestHandler class
