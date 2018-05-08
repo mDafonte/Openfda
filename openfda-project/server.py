@@ -12,7 +12,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         headers = {'User-Agent': 'http-client'}
         self.send_response(200)
         if self.path == "/":
-            with open("search.html","r")as f:
+            with open("search2.html","r")as f:
                 message=f.read()
         elif "search" in self.path:
             conn = http.client.HTTPSConnection("api.fda.gov")
@@ -25,7 +25,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             conn.close()
             message = json.loads(info_bruto)
             message = str(info_bruto)
-
+        self.wfile.write(bytes(message, "utf8"))
         self.send_header('Content-type','text/html')
         self.end_headers()
         self.wfile.write(bytes(message, "utf8"))
