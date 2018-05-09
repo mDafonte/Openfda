@@ -26,90 +26,107 @@ class OpenFDAClient():
 class OpenFDAParser():
     def lol(self,info_lista,plus):
         list=[]
-        for i in range(len(info_lista["results"])):
-            list.append(info_lista["results"][i][plus]
+        if len(plus)==2:
+            for i in range(len(info_lista["results"])):
+                try:
+                    list.append(info_lista["results"][i][plus[0]][plus[1]])
+                except KeyError:
+                    list.append("Unknown")
+        elif len(plus)==3:
+            for i in range(len(info_lista["results"])):
+                try:
+                    list.append(info_lista["results"][i][plus[0]][plus[1]][plus[2]])
+                except KeyError:
+                    list.append("Unknonwn")
         return list
-class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
-    # GET
+class testHTTPHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        list=[]
-        if self.path == "/":
-            self.send_response(200)
-            with open("search2.html","r")as f:
-                message=f.read()
-            with open("text.html","w")as f:
-                f.write(message)
+        try:
+            list=[]
+            if self.path == "/":
+                self.send_response(200)
+                with open("search2.html","r")as f:
+                    message=f.read()
+                with open("text.html","w")as f:
+                    f.write(message)
 
-        elif "searchDrug" in self.path:
-            self.send_response(200)
-            drug=self.path.split("&")[0].split("=")[1]
-            limit=self.path.split("&")[1].split("=")[1]
-            url = "/drug/label.json?search=active_ingredient:" + drug + "&" + "limit=" + limit
-            info_lista= OpenFDAClient.urldrug(self,url)
-            abba=["active_ingredient"][0]
+            elif "searchDrug" in self.path:
+                self.send_response(200)
+                drug=self.path.split("&")[0].split("=")[1]
+                if "limit"in self.path:
+                    limit=self.path.split("&")[1].split("=")[1]
+                else:
+                    limit="10"
+                url = "/drug/label.json?search=active_ingredient:" + drug + "&" + "limit=" + limit
+                info_lista= OpenFDAClient.urldrug(self,url)
+                abba=["active_ingredient",0]
+                list= OpenFDAParser.lol(self,info_lista,abba)
+                OpenFDAHTML.texto(self,list)
 
-            OpenFDAHTML.texto(self,list)
+            elif "searchCompany" in self.path:
+                self.send_response(200)
+                company=self.path.split("&")[0].split("=")[1]
+                if "limit"in self.path:
+                    limit=self.path.split("&")[1].split("=")[1]
+                else:
+                    limit="10"
+                url = "/drug/label.json?search=manufacturer_name:" + company + "&" + "limit=" + limit
+                info_lista = OpenFDAClient.urldrug(self, url)
+                abba = ["openfda","manufacturer_name",0]
+                list = OpenFDAParser.lol(self, info_lista, abba)
+                OpenFDAHTML.texto(self, list)
 
-        elif "searchCompany" in self.path:
-            self.send_response(200)
-            company=self.path.split("&")[0].split("=")[1]
-            limit=self.path.split("&")[1].split("=")[1]
-            url = "/drug/label.json?search=manufacturer_name:" + company + "&" + "limit=" + limit
-            info_lista = OpenFDAClient.urldrug(self, url)
-            for i in range(len(info_lista["results"])):
-                list.append(info_lista["results"][i]["openfda"]["manufacturer_name"][0])
-            OpenFDAHTML.texto(self, list)
+            elif "listDrugs" in self.path:
+                self.send_response(200)
+                n=self.path.split("?")[1].split("=")[1]
+                url = "/drug/label.json?limit=" + n
+                info_lista = OpenFDAClient.urldrug(self, url)
+                abba=["openfda","brand_name",0]
+                list = OpenFDAParser.lol(self,info_lista,abba)
+                OpenFDAHTML.texto(self, list)
 
-        elif "listDrugs" in self.path:
-            self.send_response(200)
-            n=self.path.split("?")[1].split("=")[1]
-            url = "/drug/label.json?limit=" + n
-            info_lista = OpenFDAClient.urldrug(self, url)
+            elif "listCompanies"in self.path:
+                self.send_response(200)
+                n=self.path.split("?")[1].split("=")[1]
+                url = "/drug/label.json?limit=" + n
+                info_lista = OpenFDAClient.urldrug(self, url)
+                abba=["openfda","manufacturer_name",0]
+                list = OpenFDAParser.lol(self, info_lista, abba)
+                OpenFDAHTML.texto(self, list)
 
-            for i in range(len(info_lista["results"])):
-                try:
-                    list.append(info_lista["results"][i]["openfda"]["brand_name"][0])
-                except KeyError:
-                    list.append("Unknown")
-            OpenFDAHTML.texto(self, list)
-
-        elif "listCompanies"in self.path:
-            self.send_response(200)
-            n=self.path.split("?")[1].split("=")[1]
-            url = "/drug/label.json?limit=" + n
-            info_lista = OpenFDAClient.urldrug(self, url)
-            for i in range(len(info_lista["results"])):
-                try:
-                    list.append(info_lista["results"][i]["openfda"]["manufacturer_name"][0])
-                except KeyError:
-                    list.append("Unknown")
-            OpenFDAHTML.texto(self, list)
-
-        elif "listWarnings"in self.path:
-            self.send_response(200)
-            n = self.path.split("?")[1].split("=")[1]
-            url = "/drug/label.json?limit=" + n
-            info_lista = OpenFDAClient.urldrug(self, url)
-            for i in range(len(info_lista["results"])):
-                try:
-                    list.append(info_lista["results"][i]["warnings"][0])
-                except KeyError:
-                    list.append("Unknown")
-            OpenFDAHTML.texto(self, list)
-
-        else:
+            elif "listWarnings"in self.path:
+                self.send_response(200)
+                n = self.path.split("?")[1].split("=")[1]
+                url = "/drug/label.json?limit=" + n
+                info_lista = OpenFDAClient.urldrug(self, url)
+                abba=["warnings",0]
+                list = OpenFDAParser.lol(self, info_lista, abba)
+                OpenFDAHTML.texto(self, list)
+            elif "secret"in self.path:
+                self.send_response(401)
+                self.send_header("WWW-Authenticate", "Basic realm='OpenFDA Private Zone")
+                self.end_headers()
+            elif "redirect"in self.path:
+                self.send_response(302)
+                self.send_header('Location', 'http://localhost:8000/')
+                self.end_headers()
+            else:
+                self.send_response(404)
+                list.append("Error 404: Webpage not found")
+                OpenFDAHTML.texto(self, list)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            with open("text.html","r")as f:
+                file=f.read()
+            self.wfile.write(bytes(file, "utf8"))
+        except KeyError:
             self.send_response(404)
             list.append("Error 404: Webpage not found")
             OpenFDAHTML.texto(self, list)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        with open("text.html","r")as f:
-            file=f.read()
-        self.wfile.write(bytes(file, "utf8"))
         return
 
 Handler = http.server.SimpleHTTPRequestHandler
-Handler = testHTTPRequestHandler
+Handler = testHTTPHandler
 httpd = socketserver.TCPServer((IP, PORT), Handler)
 print("serving at port", PORT)
 httpd.serve_forever()
